@@ -162,7 +162,7 @@ export default function PostDetail({ id }: PostDetailProps) {
           </Button>
 
           <div className="flex gap-4">
-            <Button className="cursor-pointer bg-red-500 hover:bg-red-400 text-white" onClick={() => handleDelete(post._id)}>Delete</Button>
+            <Button className="cursor-pointer bg-red-500 hover:bg-red-600 text-white" onClick={() => handleDelete(post._id)}>Delete</Button>
             <Button
               className="cursor-pointer bg-black text-white hover:bg-gray-900 hover:text-white"
               variant="ghost"

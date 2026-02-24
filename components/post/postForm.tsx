@@ -276,9 +276,8 @@ export default function PostForm({ mode, id }: PostFormProps) {
                                         }
                                     }}
                                 />
-                                <span className="text-stone-600">Allowed file types: jpg, png, jpeg</span>
                                 {preview && preview !== "null" ? (
-                                    <div className="absolute right-2 bottom-2.5 -translate-y-1/2">
+                                    <div className="absolute right-2 top-12.5 -translate-y-1/2">
                                         <div className="relative">
                                             <div
                                                 role="button"
@@ -313,6 +312,7 @@ export default function PostForm({ mode, id }: PostFormProps) {
                                         </div>
                                     </div>
                                 ) : null}
+                                <span className="text-stone-600">Allowed file types: jpg, png, jpeg</span>
                             </div>
                             {((formik.touched.banner && formik.errors.banner) || formik.submitCount > 0) && (
                                 <p className="text-sm text-red-500">{(formik.errors.banner as any) || ""}</p>
@@ -354,9 +354,8 @@ export default function PostForm({ mode, id }: PostFormProps) {
                                         }
                                     }}
                                 />
-                                <span className="text-stone-600">Allowed file types: jpg, png, jpeg</span>
                                 {profilePreview ? (
-                                    <div className="absolute right-2 bottom-2.5 -translate-y-1/2">
+                                    <div className="absolute right-2 top-12.5 -translate-y-1/2">
                                         <div className="relative">
                                             <div
                                                 role="button"
@@ -391,6 +390,7 @@ export default function PostForm({ mode, id }: PostFormProps) {
                                         </div>
                                     </div>
                                 ) : null}
+                                <span className="text-stone-600">Allowed file types: jpg, png, jpeg</span>
                             </div>
                         </div>
 
