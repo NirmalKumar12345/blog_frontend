@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getPostByIdService } from "@/services/post.services"
+import { deletePostService, getPostByIdService } from "@/services/post.services"
 import { useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Heart } from "lucide-react"
+import { set } from "zod"
 
 interface PostDetailProps {
   id: string
@@ -47,22 +48,32 @@ export default function PostDetail({ id }: PostDetailProps) {
 
     fetchPost()
   }, [id, router])
-
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await deletePostService(id)
+      toast.success(res?.msg)
+      router.push("/post")
+    } catch (err: any) {
+      toast.error(err?.response?.data?.msg || "Failed to delete post")
+    }
+  }
   if (loading) return <p>Loading...</p>
   if (!post) return <p>No post found</p>
   const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? ''
   const hasBanner = Boolean(
     post.banner &&
-      post.banner !== "null" &&
-      post.banner !== `${apiBase}/null` &&
-      post.banner !== "/null"
+    post.banner !== "null" &&
+    post.banner !== `${apiBase}/null` &&
+    post.banner !== "/null"
   )
+  const bannerSrc = hasBanner ? (post.banner.startsWith('http') || post.banner.startsWith('//') ? post.banner : `${apiBase}/${post.banner}`) : undefined
+  const profileSrc = post.authorDetails?.profile ? (post.authorDetails.profile.startsWith('http') || post.authorDetails.profile.startsWith('//') ? post.authorDetails.profile : `${apiBase}/${post.authorDetails.profile}`) : undefined
   return (
     <div className="p-6 lg:p-12 flex min-h-screen justify-center items-center bg-gradient-to-b from-white via-slate-50 to-slate-100">
       <div className=" w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 lg:p-10 space-y-6 border border-gray-100">
         <div className="relative rounded-lg overflow-hidden">
           <Image
-            src={ hasBanner ? `${apiBase}/${post.banner}` : "/blog.jpg" }
+            src={bannerSrc ?? "/blog.jpg"}
             alt={post.title}
             width={1200}
             height={600}
@@ -72,7 +83,7 @@ export default function PostDetail({ id }: PostDetailProps) {
           <div className="absolute left-4 bottom-4 flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center overflow-hidden ring-2 ring-white">
               <Image
-                src={post.authorDetails?.profile ? `${apiBase}/${post.authorDetails.profile}` : '/profile.jpg'}
+                src={profileSrc ?? '/profile.jpg'}
                 alt={post.authorDetails?.name || 'Author'}
                 width={48}
                 height={48}
@@ -127,7 +138,7 @@ export default function PostDetail({ id }: PostDetailProps) {
           {post.tags?.map((tag: string) => (
             <span
               key={tag}
-              className={`px-3 py-1 rounded-full text-sm font-medium text-white`} 
+              className={`px-3 py-1 rounded-full text-sm font-medium text-white`}
               style={{ background: tagColor(tag) }}
             >
               {tag}
@@ -149,7 +160,9 @@ export default function PostDetail({ id }: PostDetailProps) {
           >
             Back
           </Button>
-          
+
+          <div className="flex gap-4">
+            <Button className="cursor-pointer bg-red-500 hover:bg-red-600 text-white" onClick={() => handleDelete(post._id)}>Delete</Button>
             <Button
               className="cursor-pointer bg-black text-white hover:bg-gray-900 hover:text-white"
               variant="ghost"
@@ -157,6 +170,7 @@ export default function PostDetail({ id }: PostDetailProps) {
             >
               Edit
             </Button>
+          </div>
         </div>
       </div>
     </div>

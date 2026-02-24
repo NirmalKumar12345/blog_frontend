@@ -38,29 +38,34 @@ export default function Post() {
   return (
     <div className="flex flex-col gap-4">
       <Header />
-    <div className="px-10 py-3 flex-col flex gap-4">
-      <PostHeader search={search} setSearch={setSearch} />
+      <div className="px-10 py-3 flex-col flex gap-4">
+        <PostHeader search={search} setSearch={setSearch} />
         <div className="flex pt-5 justify-center items-center">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-     {posts.length===0 ? <p className="flex justify-center text-center items-center font-bold">No posts found</p> : posts.map((post) => (
-        <PostCard
-          key={post._id}
-          id={post._id}
-          title={post.title}
-          tags={post.tags}
-          content={post.content}
-          banner={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/${post.banner}`}
-          slug={post.slug}
-          createdAt={post.createdAt}
-          authorDetails={{
-            name: post?.authorDetails?.name ?? "",
-            profile: post?.authorDetails?.profile ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/${post?.authorDetails?.profile}` : null,
-          }}
-        />
-      ))}
-    </div>
-    </div>
-    </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {posts.length === 0 ? <p className="flex justify-center text-center items-center font-bold">No posts found</p> : posts.map((post) => {
+              const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? ''
+              const bannerUrl = post.banner && (post.banner.startsWith('http') || post.banner.startsWith('//')) ? post.banner : `${apiBase}/${post.banner}`
+              const profileUrl = post?.authorDetails?.profile && (post.authorDetails.profile.startsWith('http') || post.authorDetails.profile.startsWith('//')) ? post.authorDetails.profile : `${apiBase}/${post?.authorDetails?.profile}`
+              return (
+                <PostCard
+                  key={post._id}
+                  id={post._id}
+                  title={post.title}
+                  tags={post.tags}
+                  content={post.content}
+                  banner={bannerUrl}
+                  slug={post.slug}
+                  createdAt={post.createdAt}
+                  authorDetails={{
+                    name: post?.authorDetails?.name ?? "",
+                    profile: post?.authorDetails?.profile ? profileUrl : null,
+                  }}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

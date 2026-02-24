@@ -85,9 +85,11 @@ export default function PostForm({ mode, id }: PostFormProps) {
                         previewObjectUrlRef.current = null
                     }
                     const base = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? ''
-                    setPreview(`${base}/${post.banner}`)
+                    const bannerSrc = post.banner && (post.banner.startsWith('http') || post.banner.startsWith('//')) ? post.banner : `${base}/${post.banner}`
+                    setPreview(bannerSrc)
                     if (post?.authorDetails?.profile) {
-                        setProfilePreview(`${base}/${post.authorDetails.profile}`)
+                        const profileSrc = post.authorDetails.profile && (post.authorDetails.profile.startsWith('http') || post.authorDetails.profile.startsWith('//')) ? post.authorDetails.profile : `${base}/${post.authorDetails.profile}`
+                        setProfilePreview(profileSrc)
                         profilePreviewObjectUrlRef.current = null
                     } else {
                         setProfilePreview(null)
@@ -274,6 +276,7 @@ export default function PostForm({ mode, id }: PostFormProps) {
                                         }
                                     }}
                                 />
+                                <span className="text-stone-600">Allowed file types: jpg, png, jpeg</span>
                                 {preview && preview !== "null" ? (
                                     <div className="absolute right-2 bottom-2.5 -translate-y-1/2">
                                         <div className="relative">
@@ -317,77 +320,77 @@ export default function PostForm({ mode, id }: PostFormProps) {
                         </div>
                         <div className="mt-4">
                             <div className="space-y-4">
-                            <Label>Author Name</Label>
-                            <Input placeholder="Author name" {...formik.getFieldProps("authorDetails.name")} />
-                            {((formik.touched.authorDetails && (formik.touched.authorDetails as any).name && (formik.errors.authorDetails as any)?.name) || formik.submitCount > 0) && (
-                                <p className="text-sm text-red-500">{(formik.errors.authorDetails as any)?.name || ""}</p>
-                            )}
+                                <Label>Author Name</Label>
+                                <Input placeholder="Author name" {...formik.getFieldProps("authorDetails.name")} />
+                                {((formik.touched.authorDetails && (formik.touched.authorDetails as any).name && (formik.errors.authorDetails as any)?.name) || formik.submitCount > 0) && (
+                                    <p className="text-sm text-red-500">{(formik.errors.authorDetails as any)?.name || ""}</p>
+                                )}
                             </div>
                         </div>
 
                         <div className="relative mt-3">
                             <div className="space-y-4">
-                            <Label>Author Profile</Label>
-                            <Input
-                                ref={profileFileInputRef}
-                                type="file"
-                                className="cursor-pointer pr-14"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0] ?? null
-                                    formik.setFieldValue("authorDetails.profile", file)
-                                    if (file) {
-                                        if (profilePreviewObjectUrlRef.current) {
-                                            try { URL.revokeObjectURL(profilePreviewObjectUrlRef.current) } catch (e) { }
+                                <Label>Author Profile</Label>
+                                <Input
+                                    ref={profileFileInputRef}
+                                    type="file"
+                                    className="cursor-pointer pr-14"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0] ?? null
+                                        formik.setFieldValue("authorDetails.profile", file)
+                                        if (file) {
+                                            if (profilePreviewObjectUrlRef.current) {
+                                                try { URL.revokeObjectURL(profilePreviewObjectUrlRef.current) } catch (e) { }
+                                            }
+                                            const objUrl = URL.createObjectURL(file)
+                                            profilePreviewObjectUrlRef.current = objUrl
+                                            setProfilePreview(objUrl)
+                                        } else {
+                                            if (profilePreviewObjectUrlRef.current) {
+                                                try { URL.revokeObjectURL(profilePreviewObjectUrlRef.current) } catch (e) { }
+                                                profilePreviewObjectUrlRef.current = null
+                                            }
+                                            setProfilePreview(null)
                                         }
-                                        const objUrl = URL.createObjectURL(file)
-                                        profilePreviewObjectUrlRef.current = objUrl
-                                        setProfilePreview(objUrl)
-                                    } else {
-                                        if (profilePreviewObjectUrlRef.current) {
-                                            try { URL.revokeObjectURL(profilePreviewObjectUrlRef.current) } catch (e) { }
-                                            profilePreviewObjectUrlRef.current = null
-                                        }
-                                        setProfilePreview(null)
-                                    }
-                                }}
-                            />
-
-                            {profilePreview ? (
-                                <div className="absolute right-2 bottom-2.5 -translate-y-1/2">
-                                    <div className="relative">
-                                        <div
-                                            role="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="cursor-pointer"
-                                        >
-                                            <Avatar size="sm">
-                                                <AvatarImage src={profilePreview} alt="Profile preview" />
-                                                <AvatarFallback>Preview</AvatarFallback>
-                                            </Avatar>
+                                    }}
+                                />
+                                <span className="text-stone-600">Allowed file types: jpg, png, jpeg</span>
+                                {profilePreview ? (
+                                    <div className="absolute right-2 bottom-2.5 -translate-y-1/2">
+                                        <div className="relative">
+                                            <div
+                                                role="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="cursor-pointer"
+                                            >
+                                                <Avatar size="sm">
+                                                    <AvatarImage src={profilePreview} alt="Profile preview" />
+                                                    <AvatarFallback>Preview</AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    formik.setFieldValue("authorDetails.profile", null)
+                                                    if (profilePreviewObjectUrlRef.current) {
+                                                        try {
+                                                            URL.revokeObjectURL(profilePreviewObjectUrlRef.current)
+                                                        } catch (e) { }
+                                                        profilePreviewObjectUrlRef.current = null
+                                                    }
+                                                    setProfilePreview(null)
+                                                    if (fileInputRef.current) {
+                                                        fileInputRef.current.value = ""
+                                                    }
+                                                }}
+                                                className="absolute cursor-pointer -top-1 -right-1 w-3 h-3 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                                            >
+                                                ×
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                formik.setFieldValue("authorDetails.profile", null)
-                                                if (profilePreviewObjectUrlRef.current) {
-                                                    try {
-                                                        URL.revokeObjectURL(profilePreviewObjectUrlRef.current)
-                                                    } catch (e) { }
-                                                    profilePreviewObjectUrlRef.current = null
-                                                }
-                                                setProfilePreview(null)
-                                                if (fileInputRef.current) {
-                                                    fileInputRef.current.value = ""
-                                                }
-                                            }}
-                                            className="absolute cursor-pointer -top-1 -right-1 w-3 h-3 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
-                                        >
-                                            ×
-                                        </button>
                                     </div>
-                                </div>
-                            ) : null}
+                                ) : null}
                             </div>
                         </div>
 
